@@ -1,3 +1,4 @@
+// controller/sendMailController.js
 import axios from "axios";
 import Lead from "../model/mailModel.js";
 
@@ -14,11 +15,10 @@ const createLead = async (req, res) => {
       return res.status(400).json({ msg: "Invalid email format" });
     }
 
-
-    // 2️⃣ Verify Turnstile token
+    // Verify Cloudflare Turnstile token
     const secret = process.env.TURNSTILE_SECRET_KEY;
     const verifyUrl = `https://challenges.cloudflare.com/turnstile/v0/siteverify`;
-    
+
     const response = await axios.post(
       verifyUrl,
       new URLSearchParams({
@@ -32,11 +32,21 @@ const createLead = async (req, res) => {
       return res.status(400).json({ msg: "Captcha verification failed" });
     }
 
-    // 3️⃣ Save lead if captcha is valid
+    // Save lead if captcha is valid
     const lead = new Lead({ name, email, message });
     await lead.save();
 
-    return res.status(201).json({ msg: "Lead created successfully" });
+    // Emit socket event to connected clients (if io exists)
+    try {
+      const io = req.app.get('io');
+      if (io) {
+        io.emit('new-lead', lead);
+      }
+    } catch (emitErr) {
+      console.warn('Failed to emit new-lead event:', emitErr);
+    }
+
+    return res.status(201).json({ msg: "Lead created successfully", lead });
 
   } catch (e) {
     console.error(e);
