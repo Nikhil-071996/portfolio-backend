@@ -6,6 +6,7 @@ import http from 'http';
 import { Server as IOServer } from 'socket.io';
 import connectDb from './config/mongodb.js';
 import sendMailRoute from './routes/sendMailRoute.js';
+import projectRoutes from "./routes/projectRoutes.js";
 
 const app = express();
 const port = process.env.PORT || 4000;
@@ -20,10 +21,9 @@ app.use(cors({
 
 app.use(express.json());
 
-// mount routes BEFORE starting server
 app.use('/api/send-mail', sendMailRoute);
+app.use("/api/projects", projectRoutes);
 
-// create HTTP server and attach socket.io
 const httpServer = http.createServer(app);
 
 const io = new IOServer(httpServer, {

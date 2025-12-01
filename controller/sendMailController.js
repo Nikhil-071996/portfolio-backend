@@ -7,7 +7,6 @@ const createLead = async (req, res) => {
   try {
     const { name, email, message, token } = req.body;
 
-    console.log("SKIP_TURNSTILE:", process.env.SKIP_TURNSTILE, "NODE_ENV:", process.env.NODE_ENV);
     const skipTurnstile = (process.env.SKIP_TURNSTILE === "true") || (process.env.NODE_ENV === "development");
 
     if (!name || !email || (!token && !skipTurnstile)) {
