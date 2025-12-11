@@ -1,9 +1,21 @@
 import express from "express";
-import { createProject, getProjects } from "../controller/projectController.js";
+import upload from "../utils/multer.js";
+import {
+  createProject,
+  deleteProject,
+  getProjects,
+  updateProject,
+} from "../controller/projectController.js";
 
 const router = express.Router();
 
-router.get("/", getProjects);        
-router.post("/", createProject);     
+router.get("/get-all", getProjects);
+
+// Upload 1 thumbnail file
+router.post("/create", upload.single("thumbnail"), createProject);
+
+router.post("/update/:id", upload.single("thumbnail"), updateProject);
+
+router.delete("/delete/:id", deleteProject);
 
 export default router;
